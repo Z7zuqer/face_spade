@@ -187,30 +187,12 @@ class FaceDataset(BaseDataset):
         params=get_params(self.opt,(-1,-1))
         # input image (real images)
         image_name = self.image_paths[index]
-        # assert self.paths_match(label_path, image_path), \
-        #     "The label_path %s and image_path %s don't match." % \
-        #     (label_path, image_path)
         image_path=os.path.join(self.opt.dataroot,self.image_raw,image_name)
         image = Image.open(image_path)
         image = image.convert('RGB')
         image = image.resize((self.opt.load_size,self.opt.load_size),Image.BICUBIC)
-
-        # TODO: Add degradation to the down-sampled image
-
-        
-        if self.opt.use_degradation_v2:
-            degraded_image=online_add_degradation_v2(image)
-
-        elif self.opt.use_degradation_v3:
-            degraded_image=online_add_degradation_v3(image)
-        else:
-            degraded_image=online_add_degradation(image)
-        #
-
-
         transform_image = get_transform(self.opt, params)
-        image_tensor = transform_image(image)
-        degraded_image_tensor = transform_image(degraded_image)    
+        image_tensor = transform_image(image) 
 
         label_name = self.label_paths[index]
         label_path=os.path.join(self.opt.dataroot,'train_label',label_name)
