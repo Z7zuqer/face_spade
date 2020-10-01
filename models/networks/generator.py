@@ -91,7 +91,7 @@ class SPADEGenerator(BaseNetwork):
         else:
             # we downsample segmap and run convolution
             if self.opt.no_parsing_map:
-                x = F.interpolate(degraded_image, size=(self.sh, self.sw),mode='bilinear')
+                x = F.interpolate(seg, size=(self.sh, self.sw),mode='bilinear')
             else:
                 x = F.interpolate(seg, size=(self.sh, self.sw),mode='nearest')
             x = self.fc(x)
