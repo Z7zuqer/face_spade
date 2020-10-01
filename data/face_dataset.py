@@ -18,17 +18,20 @@ class FaceTestDataset(BaseDataset):
     def initialize(self, opt):
         self.opt = opt
 
-        image_path=os.path.join(opt.dataroot,opt.old_face_folder)
-        label_path=os.path.join(opt.dataroot,opt.old_face_label_folder)
+        image_path=os.path.join(opt.dataroot,'train_img')
+        label_path=os.path.join(opt.dataroot,'train_label')
+        guide_path=os.path.join(opt.dataroot,'train_guide')
 
         image_list=os.listdir(image_path)
         image_list=sorted(image_list)
         # image_list=image_list[:opt.max_dataset_size]
+        
+        label_list = sorted(os.listdir(label_path))
+        guide_list = sorted(os.listdir(guide_path))
 
-
-        self.label_paths = label_path ## Just the root dir
+        self.label_paths = label_list ## Just the root dir
         self.image_paths = image_list ## All the image name
-
+        self.guide_paths = guide_list
 
         self.parts=['skin','hair', 'l_brow', 'r_brow', 'l_eye', 'r_eye', 'eye_g','l_ear', 'r_ear', 'ear_r', 'nose', 'mouth','u_lip', 'l_lip', 'neck', 'neck_l', 'cloth', 'hat']
 
@@ -51,20 +54,26 @@ class FaceTestDataset(BaseDataset):
         params=get_params(self.opt,(-1,-1))
         # input image (real images)
         image_name = self.image_paths[index]
-        # assert self.paths_match(label_path, image_path), \
-        #     "The label_path %s and image_path %s don't match." % \
-        #     (label_path, image_path)
-        image_path=os.path.join(self.opt.dataroot,self.opt.old_face_folder,image_name)
+        image_path=os.path.join(self.opt.dataroot,'train_img',image_name)
         image = Image.open(image_path)
         image = image.convert('RGB')
-
-
-
         transform_image = get_transform(self.opt, params)
         image_tensor = transform_image(image)
     #    degraded_image_tensor = transform_image(degraded_image)
         
-
+        label_name = self.label_paths[index]
+        label_path=os.path.join(self.opt.dataroot,'train_label',label_name)
+        label = Image.open(label_path)
+        label = image.convert('RGB')
+        transform_image = get_transform(self.opt, params)
+        label_tensor = transform_image(label)
+        
+        guide_name = self.guide_paths[index]
+        image_path=os.path.join(self.opt.dataroot,'train_guide',_name)
+        image = Image.open(image_path)
+        image = image.convert('RGB')
+        transform_image = get_transform(self.opt, params)
+        image_tensor = transform_image(image)
 
         ## From the image name to search corresponding parsing mask
 
@@ -149,8 +158,12 @@ class FaceDataset(BaseDataset):
         image_list=image_list[:opt.max_dataset_size]
 
 
-        self.label_paths = label_path ## Just the root dir
+        label_list = sorted(os.listdir(label_path))[:opt.max_dataset_size]
+        guide_list = sorted(os.listdir(guide_path))[:opt.max_dataset_size]
+
+        self.label_paths = label_list ## Just the root dir
         self.image_paths = image_list ## All the image name
+        self.guide_paths = guide_list
 
 
         self.parts=['skin','hair', 'l_brow', 'r_brow', 'l_eye', 'r_eye', 'eye_g','l_ear', 'r_ear', 'ear_r', 'nose', 'mouth','u_lip', 'l_lip', 'neck', 'neck_l', 'cloth', 'hat']
@@ -197,56 +210,24 @@ class FaceDataset(BaseDataset):
 
         transform_image = get_transform(self.opt, params)
         image_tensor = transform_image(image)
-        degraded_image_tensor = transform_image(degraded_image)
+        degraded_image_tensor = transform_image(degraded_image)    
 
+        label_name = self.label_paths[index]
+        label_path=os.path.join(self.opt.dataroot,'train_label',label_name)
+        label = Image.open(label_path)
+        label = image.convert('RGB')
+        transform_image = get_transform(self.opt, params)
+        label_tensor = transform_image(label)
+        
+        guide_name = self.guide_paths[index]
+        image_path=os.path.join(self.opt.dataroot,'train_guide',_name)
+        image = Image.open(image_path)
+        image = image.convert('RGB')
+        transform_image = get_transform(self.opt, params)
+        image_tensor = transform_image(image)
 
-
-        ## From the image name to search corresponding parsing mask
-
-        img_id=int(image_name.split('.')[-2])
-        label_folder=int(img_id/2000)
-        transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
-        full_label=[]
-
-        cnt=0
-
-        for each_part in self.parts:
-            part_name=str(img_id).zfill(5)+'_'+each_part+'.png'
-            part_url=os.path.join(self.label_paths,str(label_folder),part_name)
-
-            if os.path.exists(part_url):
-                label=Image.open(part_url).convert("RGB")
-                label_tensor=transform_label(label) ## 3 channels and pixel [0,1]
-                full_label.append(label_tensor[0])
-            else:
-                current_part=torch.zeros((self.opt.load_size,self.opt.load_size))
-                full_label.append(current_part)
-                cnt+=1
-
-        # if cnt>8:
-        #     print("Maybe the part is not searched well")
-        #     print(image_path)
-
-        full_label_tensor=torch.stack(full_label,0)
-
-
-
-    
-        # # if using instance maps
-        # if self.opt.no_instance:
-        #     instance_tensor = 0
-        # else:
-        #     instance_path = self.instance_paths[index]
-        #     instance = Image.open(instance_path)
-        #     if instance.mode == 'L':
-        #         instance_tensor = transform_label(instance) * 255
-        #         instance_tensor = instance_tensor.long()
-        #     else:
-        #         instance_tensor = transform_label(instance)
-
-        input_dict = {'label': full_label_tensor,
-                    #   'instance': instance_tensor,
-                        'degraded_image': degraded_image_tensor,
+        input_dict = {'label': label_tensor,
+                      'degraded_image': guide_tensor,
                       'image': image_tensor,
                       'path': image_path,
                       }
