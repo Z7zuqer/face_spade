@@ -136,9 +136,13 @@ class FaceDataset(BaseDataset):
 
     def initialize(self, opt):
         self.opt = opt
+        
+        self.image_raw= 'train_img'
+        self.image_gt = 'train_label'
+        self.image_guidence = 'train_guide'
 
-        image_path=os.path.join(opt.dataroot,'CelebA-HQ-img')
-        label_path=os.path.join(opt.dataroot,'CelebAMask-HQ-mask-anno')
+        image_path=os.path.join(opt.dataroot, self.image_raw)
+        label_path=os.path.join(opt.dataroot, self.image_gt)
 
         image_list=os.listdir(image_path)
         image_list=sorted(image_list)
@@ -173,7 +177,7 @@ class FaceDataset(BaseDataset):
         # assert self.paths_match(label_path, image_path), \
         #     "The label_path %s and image_path %s don't match." % \
         #     (label_path, image_path)
-        image_path=os.path.join(self.opt.dataroot,'CelebA-HQ-img',image_name)
+        image_path=os.path.join(self.opt.dataroot,self.image_raw,image_name)
         image = Image.open(image_path)
         image = image.convert('RGB')
         image = image.resize((self.opt.load_size,self.opt.load_size),Image.BICUBIC)
