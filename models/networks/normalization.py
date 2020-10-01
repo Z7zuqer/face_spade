@@ -106,13 +106,13 @@ class SPADE(nn.Module):
         normalized = self.param_free_norm(x)
 
         # Part 2. produce scaling and bias conditioned on semantic map
-        segmap = F.interpolate(segmap, size=x.size()[2:], mode='nearest')
+        # segmap = F.interpolate(segmap, size=x.size()[2:], mode='nearest')
         degraded_face = F.interpolate(degraded_image, size=x.size()[2:], mode='bilinear')
 
-        if self.opt.no_parsing_map:
-            actv = self.mlp_shared(degraded_face)
-        else:
-            actv = self.mlp_shared(torch.cat((segmap,degraded_face),dim=1))
+        # if self.opt.no_parsing_map:
+        actv = self.mlp_shared(degraded_face)
+        # else:
+            # actv = self.mlp_shared(torch.cat((segmap,degraded_face),dim=1))
         gamma = self.mlp_gamma(actv)
         beta = self.mlp_beta(actv)
 
