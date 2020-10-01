@@ -87,7 +87,7 @@ class SPADE(nn.Module):
 
         pw = ks // 2
 
-        if self.opt.no_parsing_map:
+        if True: # self.opt.no_parsing_map:
             self.mlp_shared = nn.Sequential(
                 nn.Conv2d(3, nhidden, kernel_size=ks, padding=pw),
                 nn.ReLU()

@@ -54,7 +54,7 @@ class Visualizer():
         all_tensor=[]
             
         for key,tensor in visuals.items():
-            if key=='input_label':
+            if False: # key=='input_label':
                 tile = self.opt.batchSize > 1
                 t = util.tensor2label(tensor, self.opt.label_nc + 2, tile=tile) ## B*H*W*3 0-255 numpy
                 t = np.transpose(t,(0,3,1,2))

@@ -152,6 +152,7 @@ class FaceDataset(BaseDataset):
 
         image_path=os.path.join(opt.dataroot, self.image_raw)
         label_path=os.path.join(opt.dataroot, self.image_gt)
+        guide_path=os.path.join(opt.dataroot, self.image_guidence)
 
         image_list=os.listdir(image_path)
         image_list=sorted(image_list)
@@ -197,16 +198,16 @@ class FaceDataset(BaseDataset):
         label_name = self.label_paths[index]
         label_path=os.path.join(self.opt.dataroot,'train_label',label_name)
         label = Image.open(label_path)
-        label = image.convert('RGB')
+        label = label.convert('RGB')
         transform_image = get_transform(self.opt, params)
         label_tensor = transform_image(label)
         
         guide_name = self.guide_paths[index]
-        image_path=os.path.join(self.opt.dataroot,'train_guide',_name)
-        image = Image.open(image_path)
-        image = image.convert('RGB')
+        guide_path=os.path.join(self.opt.dataroot,'train_guide',guide_name)
+        guide = Image.open(guide_path)
+        guide = guide.convert('RGB')
         transform_image = get_transform(self.opt, params)
-        image_tensor = transform_image(image)
+        guide_tensor = transform_image(guide)
 
         input_dict = {'label': label_tensor,
                       'degraded_image': guide_tensor,
